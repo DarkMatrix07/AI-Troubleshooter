@@ -1,0 +1,1370 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Troubleshooter</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .plugin-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .plugin-active {
+            border-left-color: var(--success-color);
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        }
+
+        .benchmark-results {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .error-input {
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .error-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+        }
+
+        .solution-card {
+            border-left: 5px solid var(--success-color);
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .solution-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logs-section {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .btn-enhanced {
+            border-radius: 12px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-enhanced:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #333;
+            word-wrap: break-word;
+        }
+
+        .log-timestamp {
+            color: #888;
+        }
+
+        .log-level-INFO { color: #00ff00; }
+        .log-level-WARNING { color: #ffaa00; }
+        .log-level-ERROR { color: #ff4444; }
+
+        .command-preview {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .execution-results {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .plugin-selector {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mt-3">Processing...</h5>
+            <p id="loadingMessage">Analyzing your issue...</p>
+        </div>
+    </div>
+
+    <div class="container-fluid py-3">
+        <div class="row">
+            <!-- Main Interface -->
+            <div class="col-lg-8">
+                <div class="main-card">
+                    <!-- Header -->
+                    <div class="header-section">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1 class="mb-2">AI Troubleshooter</h1>
+                                <p class="mb-0 opacity-75">System Issue Resolver</p>
+                            </div>
+                            <div class="status-indicators">
+                                <div class="status-badge" id="aiStatus">
+                                    <i class="fas fa-robot me-1"></i>
+                                    AI: Loading...
+                                </div>
+                                <div class="status-badge" id="pluginStatus">
+                                    <i class="fas fa-puzzle-piece me-1"></i>
+                                    Plugin: None
+                                </div>
+                                <div class="status-badge" id="systemStatus">
+                                    <i class="fas fa-server me-1"></i>
+                                    System: Online
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="p-4">
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-tabs mb-4" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="analyze-tab" data-bs-toggle="tab" data-bs-target="#analyze-panel" type="button" role="tab">
+                                    <i class="fas fa-search me-2"></i>Issue Analysis
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="plugins-tab" data-bs-toggle="tab" data-bs-target="#plugins-panel" type="button" role="tab">
+                                    <i class="fas fa-puzzle-piece me-2"></i>AI Plugins
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system-panel" type="button" role="tab">
+                                    <i class="fas fa-desktop me-2"></i>System Status
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content">
+                            <!-- Analysis Panel -->
+                            <div class="tab-pane fade show active" id="analyze-panel" role="tabpanel">
+                                <!-- Error Input Section -->
+                                <div class="mb-4">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                        Describe Your System Issue
+                                    </h5>
+                                    <textarea 
+                                        id="errorInput" 
+                                        class="form-control error-input" 
+                                        placeholder="Describe your computer problem in detail...
+
+Examples:
+â€¢ My screen keeps flickering and going black
+â€¢ WiFi won't connect to any network
+â€¢ Computer is running very slow and freezing
+â€¢ Getting blue screen errors
+â€¢ Audio/sound not working"
+                                    ></textarea>
+                                    
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button id="analyzeBtn" class="btn btn-primary btn-enhanced">
+                                            <i class="fas fa-search me-2"></i>
+                                            Analyze Issue
+                                        </button>
+                                        <button id="clearBtn" class="btn btn-outline-secondary btn-enhanced">
+                                            <i class="fas fa-eraser me-2"></i>
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Results Section -->
+                                <div id="resultsSection" style="display: none;">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-lightbulb text-success me-2"></i>
+                                        AI Analysis Results
+                                    </h5>
+                                    <div id="resultsContainer"></div>
+                                </div>
+
+                                <!-- Example Issues -->
+                                <div class="mt-4">
+                                    <h6 class="text-muted mb-3">Quick Examples (Click to Use)</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary btn-sm w-100 example-btn" 
+                                                    data-example="My screen keeps flickering">
+                                                Screen Flickering
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary btn-sm w-100 example-btn" 
+                                                    data-example="WiFi not connecting">
+                                                WiFi Issues
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary btn-sm w-100 example-btn" 
+                                                    data-example="Computer running very slow">
+                                                Slow Performance
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary btn-sm w-100 example-btn" 
+                                                    data-example="Blue screen crash BSOD">
+                                                Blue Screen (BSOD)
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary btn-sm w-100 example-btn" 
+                                                    data-example="Computer won't boot startup issue">
+                                                Boot Issues
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary btn-sm w-100 example-btn" 
+                                                    data-example="Clear cache">
+                                                Clear Cache
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Plugin Management Panel -->
+                            <div class="tab-pane fade" id="plugins-panel" role="tabpanel">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-puzzle-piece me-2"></i>
+                                    AI Plugin Management
+                                </h5>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>AI Plugins:</strong> Switch between different AI models for text embedding and analysis.
+                                </div>
+
+                                <div id="pluginsList">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        Loading plugin information...
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <button id="refreshPluginsBtn" class="btn btn-outline-primary btn-enhanced me-2">
+                                        <i class="fas fa-sync me-2"></i>
+                                        Refresh Plugins
+                                    </button>
+                                    <button id="autoSelectBtn" class="btn btn-outline-success btn-enhanced">
+                                        <i class="fas fa-magic me-2"></i>
+                                        Auto-Select Best
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- System Status Panel -->
+                            <div class="tab-pane fade" id="system-panel" role="tabpanel">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-desktop me-2"></i>
+                                    System Status
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">RAM Usage</h6>
+                                                <div id="sys-ram">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Disk Usage</h6>
+                                                <div id="sys-disk">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Battery</h6>
+                                                <div id="sys-battery">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Network</h6>
+                                                <div id="sys-network">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">Wi-Fi</h6>
+                                                <div id="sys-wifi">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="card-title mb-0">Top Processes</h6>
+                                                    <button id="refreshSystemBtn" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-sync me-1"></i>Refresh
+                                                    </button>
+                                                </div>
+                                                <div id="sys-processes" class="table-responsive small">
+                                                    <div class="text-muted">Loading...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- System Monitor -->
+                <div class="main-card mb-3">
+                    <div class="p-3">
+                        <h6 class="mb-3">
+                            <i class="fas fa-chart-line me-2"></i>
+                            System Monitor
+                        </h6>
+                        <div class="performance-metrics">
+                            <div class="metric-card">
+                                <div class="metric-value" id="analysisCount">0</div>
+                                <div class="metric-label">Analyses</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="successRate">--</div>
+                                <div class="metric-label">Success Rate</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value text-info" id="aiMode">Loading...</div>
+                                <div class="metric-label">AI Mode</div>
+                            </div>
+                        </div>
+                        <button id="refreshStatsBtn" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                            <i class="fas fa-sync me-1"></i>
+                            Refresh Stats
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activity Logs -->
+                <div class="main-card">
+                    <div class="p-3">
+                        <h6 class="mb-3">
+                            <i class="fas fa-list-alt me-2"></i>
+                            Activity Log
+                        </h6>
+                        
+                        <div class="mb-2">
+                            <select id="logCategory" class="form-select form-select-sm">
+                                <option value="">All Activities</option>
+                                <option value="ANALYSIS">Analysis</option>
+                                <option value="EXECUTION">Execution</option>
+                                <option value="PLUGIN">Plugin</option>
+                                <option value="SYSTEM">System</option>
+                                <option value="ERROR">Errors</option>
+                            </select>
+                        </div>
+                        
+                        <div class="logs-section" id="logsContainer">
+                            <div class="log-entry">
+                                <span class="log-timestamp">[System Start]</span>
+                                <span class="log-message">AI Troubleshooter interface initialized</span>
+                                <span class="log-message">FixMate AI interface initialized</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2 d-flex gap-1">
+                            <button id="refreshLogsBtn" class="btn btn-outline-light btn-sm flex-fill">
+                                <i class="fas fa-sync me-1"></i>
+                                Refresh
+                            </button>
+                            <button id="clearLogsBtn" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-trash me-1"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-magic me-2"></i>
+                        Execute Solution
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Solution Ready:</strong> Our AI has prepared a solution to help fix your issue.
+                    </div>
+                    
+                    <h6 class="mt-3">What this will do:</h6>
+                    <p id="command-description" class="text-muted"></p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This will execute system commands. Make sure to read the Description before Executing.
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="understand-checkbox">
+                        <label class="form-check-label" for="understand-checkbox">
+                            I understand and want to execute this solution
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="button" id="execute-confirm" class="btn btn-success" disabled>
+                        <i class="fas fa-magic me-2"></i>Execute Solution
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentSolutions = [];
+        let currentSelectedSolution = null;
+        let activityLog = [];
+        let analysisCount = 0;
+        let successCount = 0;
+        let availablePlugins = [];
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            checkSystemHealth();
+            loadPluginInfo();
+            loadSystemInfo();
+            addLogEntry('SYSTEM', 'Interface loaded successfully', 'INFO');
+        });
+
+        function setupEventListeners() {
+            // Main buttons
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeIssue);
+            document.getElementById('clearBtn').addEventListener('click', clearInput);
+            
+            // Plugin management
+            document.getElementById('refreshPluginsBtn').addEventListener('click', loadPluginInfo);
+            document.getElementById('autoSelectBtn').addEventListener('click', autoSelectPlugin);
+            
+            // Example buttons
+            document.querySelectorAll('.example-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.getElementById('errorInput').value = this.dataset.example;
+                    addLogEntry('SYSTEM', `Example loaded: ${this.dataset.example}`, 'INFO');
+                });
+            });
+            
+            // Sidebar buttons
+            document.getElementById('refreshLogsBtn').addEventListener('click', refreshLogs);
+            document.getElementById('clearLogsBtn').addEventListener('click', clearLogs);
+            document.getElementById('logCategory').addEventListener('change', refreshLogs);
+            const rs = document.getElementById('refreshSystemBtn');
+            if (rs) rs.addEventListener('click', loadSystemInfo);
+            
+            // Modal controls
+            document.getElementById('understand-checkbox').addEventListener('change', function() {
+                document.getElementById('execute-confirm').disabled = !this.checked;
+            });
+            
+            document.getElementById('execute-confirm').addEventListener('click', executeSelectedSolution);
+            
+            // Enter key shortcut
+            document.getElementById('errorInput').addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    analyzeIssue();
+                }
+            });
+
+            // Tab switching
+            document.getElementById('plugins-tab').addEventListener('shown.bs.tab', loadPluginInfo);
+            document.getElementById('system-tab').addEventListener('shown.bs.tab', loadSystemInfo);
+        }
+
+        async function loadPluginInfo() {
+            try {
+                const response = await fetch('/plugins');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPluginsBasedOnStatus(data);
+                    
+                    // Update status indicator
+                    const statusText = data.active_plugin || 
+                                     (data.status === 'loading' ? 'Loading...' : 
+                                      data.status === 'error' ? 'Error' : 'Fallback');
+                    
+                    document.getElementById('pluginStatus').innerHTML = 
+                        `<i class="fas fa-puzzle-piece me-1"></i>Plugin: ${statusText}`;
+                        
+                    addLogEntry('PLUGIN', `Plugin status: ${data.status}${data.message ? ' - ' + data.message : ''}`, 'INFO');
+                } else {
+                    displayPluginError(data.error);
+                }
+            } catch (error) {
+                displayPluginError('Failed to load plugin information: ' + error.message);
+                addLogEntry('ERROR', `Plugin loading failed: ${error.message}`, 'ERROR');
+            }
+        }
+
+        function displayPluginsBasedOnStatus(data) {
+            const container = document.getElementById('pluginsList');
+            
+            switch(data.status) {
+                case 'loading':
+                    container.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="fas fa-spinner loading-spinner me-2"></i>
+                            <strong>Loading AI Plugins...</strong><br>
+                            ${data.message || 'Please wait while AI models are being initialized in the background.'}
+                        </div>
+                    `;
+                    // Auto-refresh every 3 seconds while loading
+                    setTimeout(loadPluginInfo, 3000);
+                    break;
+                    
+                case 'error':
+                    container.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Plugin Loading Failed</strong><br>
+                            ${data.message || data.error || 'Unknown error occurred during plugin initialization.'}
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Don't worry!</strong> The system is running in fallback mode with enhanced TF-IDF text analysis.
+                            All features work normally, just without advanced neural AI.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'fallback':
+                    container.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Fallback Mode Active</strong><br>
+                            ${data.message || 'No AI plugins available. System is using enhanced TF-IDF analysis.'}
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-download me-2"></i>
+                            To enable advanced AI features, install:<br>
+                            <code>pip install torch sentence-transformers</code><br>
+                            or<br>
+                            <code>pip install tensorflow tensorflow-hub</code>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'loaded':
+                    if (Object.keys(data.plugin_info || {}).length === 0) {
+                        container.innerHTML = `
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No AI plugins available. Install PyTorch or TensorFlow for enhanced functionality.
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    availablePlugins = data.available_plugins || [];
+                    const pluginsHtml = Object.entries(data.plugin_info).map(([key, plugin]) => {
+                        const isActive = plugin.is_active;
+                        const cardClass = isActive ? 'plugin-card plugin-active' : 'plugin-card';
+                        
+                        return `
+                            <div class="${cardClass}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            ${plugin.name} 
+                                            ${isActive ? '<span class="badge bg-success ms-2">Active</span>' : ''}
+                                        </h6>
+                                        <small class="text-muted">Version: ${plugin.version} | Dimension: ${plugin.dimension}</small>
+                                    </div>
+                                    ${!isActive ? `
+                                        <button class="btn btn-outline-primary btn-sm" onclick="switchPlugin('${key}')">
+                                            <i class="fas fa-check me-1"></i>Activate
+                                        </button>
+                                    ` : `
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Active
+                                        </span>
+                                    `}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    container.innerHTML = pluginsHtml;
+                    break;
+                    
+                default:
+                    container.innerHTML = `
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-question-circle me-2"></i>
+                            <strong>Unknown Status:</strong> ${data.status}
+                        </div>
+                    `;
+            }
+        }
+
+        function displayPluginError(error) {
+            const container = document.getElementById('pluginsList');
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${error}
+                </div>
+            `;
+        }
+
+        async function switchPlugin(pluginName) {
+            showLoading('Switching AI plugin...');
+            addLogEntry('PLUGIN', `Switching to plugin: ${pluginName}`, 'INFO');
+
+            try {
+                const response = await fetch('/plugins/switch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plugin_name: pluginName })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`Switched to ${pluginName}`, 'success');
+                    addLogEntry('PLUGIN', `Successfully switched to: ${pluginName}`, 'INFO');
+                    loadPluginInfo();
+                } else {
+                    showNotification(`Failed to switch plugin: ${data.error}`, 'danger');
+                    addLogEntry('ERROR', `Plugin switch failed: ${data.error}`, 'ERROR');
+                }
+            } catch (error) {
+                showNotification('Plugin switch failed: ' + error.message, 'danger');
+                addLogEntry('ERROR', `Plugin switch error: ${error.message}`, 'ERROR');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function autoSelectPlugin() {
+            showLoading('Auto-selecting best plugin...');
+            addLogEntry('PLUGIN', 'Auto-selecting best available plugin', 'INFO');
+
+            try {
+                // This triggers the backend to auto-select the best plugin
+                await loadPluginInfo();
+                showNotification('Best plugin selected automatically', 'success');
+            } catch (error) {
+                showNotification('Auto-select failed: ' + error.message, 'danger');
+                addLogEntry('ERROR', `Auto-select failed: ${error.message}`, 'ERROR');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // System info (replaces benchmark)
+        async function loadSystemInfo() {
+            showLoading('Fetching system info...');
+            try {
+                const response = await fetch('/system-info');
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || 'Failed');
+                renderSystemInfo(data.data || {});
+            } catch (error) {
+                renderSystemInfo(null, error.message);
+                addLogEntry('ERROR', `System info failed: ${error.message}`, 'ERROR');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderSystemInfo(info, errorMsg) {
+            const setText = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+            if (!info) {
+                setText('sys-ram', `Error: ${errorMsg || 'N/A'}`);
+                setText('sys-disk', '--');
+                setText('sys-battery', '--');
+                setText('sys-network', '--');
+                setText('sys-wifi', '--');
+                const proc = document.getElementById('sys-processes');
+                if (proc) proc.innerHTML = '<div class="text-danger">Failed to load system info.</div>';
+                return;
+            }
+            if (info.ram) {
+                setText('sys-ram', `${info.ram.percent}% used (${info.ram.used_gb}/${info.ram.total_gb} GB)`);
+            } else {
+                setText('sys-ram', 'N/A');
+            }
+            if (info.disk) {
+                setText('sys-disk', `${info.disk.percent}% used (${info.disk.used_gb}/${info.disk.total_gb} GB)`);
+            } else {
+                setText('sys-disk', 'N/A');
+            }
+            if (info.battery) {
+                setText('sys-battery', `${info.battery.percent}% ${info.battery.plugged ? '(plugged)' : ''}`);
+            } else {
+                setText('sys-battery', 'N/A');
+            }
+            if (info.network && info.network.length) {
+                const entries = info.network.map(n => `${n.interface} (${n.speed}Mbps) ${n.ips && n.ips.length ? n.ips.join(', ') : ''}`).join(' | ');
+                setText('sys-network', entries);
+            } else {
+                setText('sys-network', 'No active interfaces');
+            }
+            if (info.wifi && info.wifi.ssid) {
+                setText('sys-wifi', `SSID: ${info.wifi.ssid}`);
+            } else {
+                setText('sys-wifi', 'No Wi-Fi info');
+            }
+            const proc = document.getElementById('sys-processes');
+            if (proc) {
+                if (info.processes && info.processes.length) {
+                    const rows = info.processes.map(p => `
+                        <tr>
+                            <td>${p.pid}</td>
+                            <td>${p.name || 'N/A'}</td>
+                            <td>${p.cpu_percent ?? 0}%</td>
+                            <td>${p.memory_percent ? p.memory_percent.toFixed(1) : 0}%</td>
+                        </tr>
+                    `).join('');
+                    proc.innerHTML = `
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>PID</th><th>Name</th><th>CPU%</th><th>RAM%</th></tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    `;
+                } else {
+                    proc.innerHTML = '<div class="text-muted">No process data.</div>';
+                }
+            }
+        }
+        function addLogEntry(category, message, level = 'INFO') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = {
+                timestamp,
+                category,
+                message,
+                level
+            };
+            
+            activityLog.unshift(logEntry);
+            
+            if (activityLog.length > 100) {
+                activityLog = activityLog.slice(0, 100);
+            }
+            
+            refreshLogs();
+        }
+
+        function formatExecutionMessage(data) {
+            const command = data.command || 'N/A';
+            if (data.success) {
+                const output = data.output ? data.output : 'Successfully executed (no output)';
+                return `Applying command: ${command} | Output: ${output}`;
+            }
+            const errorText = data.error || 'Unknown error';
+            return `Applying command: ${command} | Error: ${errorText}`;
+        }
+
+        function showLoading(message = 'Processing...') {
+            document.getElementById('loadingMessage').textContent = message;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showNotification(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px; animation: slideIn 0.3s ease-out;';
+            toast.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        async function analyzeIssue() {
+            const errorText = document.getElementById('errorInput').value.trim();
+            
+            if (!errorText) {
+                showNotification('Please describe your system issue first.', 'warning');
+                addLogEntry('ERROR', 'Analysis attempted with empty input', 'WARNING');
+                return;
+            }
+
+            showLoading('AI is analyzing your issue...');
+            addLogEntry('ANALYSIS', `Starting analysis: "${errorText.substring(0, 50)}..."`, 'INFO');
+            analysisCount++;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ error: errorText }),
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentSolutions = data.solutions || [];
+                    displaySolutions(data);
+                    showNotification('Solution(s) found successfully!', 'success');
+                    addLogEntry('ANALYSIS', `${data.solutions.length} solution(s) found`, 'INFO');
+                    successCount++;
+                } else {
+                    displayError(data.error || 'No matching solution found');
+                    showNotification(data.error || 'No solution found', 'danger');
+                    addLogEntry('ANALYSIS', `No solution found: ${data.error}`, 'ERROR');
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                if (error.name === 'AbortError') {
+                    displayError('Analysis timed out. Please try again.');
+                    showNotification('Analysis timed out. Please try again.', 'danger');
+                    addLogEntry('ERROR', 'Analysis timed out', 'ERROR');
+                } else {
+                    displayError('Analysis failed: Solution not found');
+                    showNotification('Analysis failed: Solution not found', 'danger');
+                    addLogEntry('ERROR', `Analysis failed: ${error.message}`, 'ERROR');
+                }
+            } finally {
+                clearTimeout(timeoutId);
+                hideLoading();
+                updateStats();
+            }
+        }
+
+        function displaySolutions(data) {
+            const container = document.getElementById('resultsContainer');
+
+            let solutionsHtml = '';
+            
+            if (data.solutions && data.solutions.length > 0) {
+                solutionsHtml = data.solutions.map((solution, index) => `
+                    <div class="solution-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0">Solution ${index + 1}</h6>
+                            <button class="btn btn-success btn-sm" onclick="showConfirmModal(${index})">
+                                <i class="fas fa-play me-1"></i>Execute
+                            </button>
+                        </div>
+                        <p class="text-muted mb-2"><strong>Description:</strong> ${solution.description}</p>
+                    </div>
+                `).join('');
+            }
+
+            container.innerHTML = `
+                <div class="solution-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h6 class="text-success mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            ${data.solutions ? data.solutions.length : 1} Solution(s) Found!
+                        </h6>
+                    </div>                    
+                    <div class="solution-selector">
+                        ${solutionsHtml}
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-3">
+                        ${data.solutions && data.solutions.length > 1 ? `
+                            <button class="btn btn-primary btn-enhanced" onclick="executeAllSolutions()">
+                                <i class="fas fa-magic me-2"></i>
+                                Execute All Solutions
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-outline-secondary btn-enhanced" onclick="clearResults()">
+                            <i class="fas fa-times me-2"></i>
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function displayError(error) {
+            const container = document.getElementById('resultsContainer');
+            
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${error}
+                </div>
+            `;
+
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function showConfirmModal(solutionIndex) {
+            if (!currentSolutions || solutionIndex >= currentSolutions.length) return;
+
+            currentSelectedSolution = solutionIndex;
+            const solution = currentSolutions[solutionIndex];
+            document.getElementById('command-description').textContent = solution.description;
+            document.getElementById('understand-checkbox').checked = false;
+            document.getElementById('execute-confirm').disabled = true;
+
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        async function executeSelectedSolution() {
+            if (currentSelectedSolution === null) return;
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+            modal.hide();
+
+            showLoading('Executing solution...');
+            addLogEntry('EXECUTION', `Executing solution ${currentSelectedSolution + 1}...`, 'INFO');
+
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ solution_id: currentSelectedSolution })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showExecutionResults([data]);
+
+                if (data.success) {
+                    showNotification('Solution executed successfully!', 'success');
+                    addLogEntry('EXECUTION', formatExecutionMessage(data), 'INFO');
+                } else {
+                    showNotification('Solution execution failed', 'danger');
+                    addLogEntry('EXECUTION', formatExecutionMessage(data), 'ERROR');
+                }
+            } catch (error) {
+                showNotification('Execution failed: ' + error.message, 'danger');
+                addLogEntry('ERROR', `Execution error: ${error.message}`, 'ERROR');
+            } finally {
+                hideLoading();
+                currentSelectedSolution = null;
+            }
+        }
+
+        async function executeAllSolutions() {
+            if (!currentSolutions || currentSolutions.length === 0) return;
+
+            showLoading('Executing all solutions...');
+            addLogEntry('EXECUTION', `Executing all ${currentSolutions.length} solutions...`, 'INFO');
+
+            try {
+                const response = await fetch('/execute-all', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showExecutionResults(data.results || []);
+                if (data.results && Array.isArray(data.results)) {
+                    data.results.forEach((result) => {
+                        const level = result.success ? 'INFO' : 'ERROR';
+                        addLogEntry('EXECUTION', formatExecutionMessage(result), level);
+                    });
+                }
+
+                if (data.success) {
+                    showNotification(`All solutions executed! ${data.successful_solutions}/${data.total_solutions} successful`, 'success');
+                    addLogEntry('EXECUTION', `Batch execution completed: ${data.successful_solutions}/${data.total_solutions} successful`, 'INFO');
+                } else {
+                    showNotification('Some solutions failed to execute', 'warning');
+                    addLogEntry('EXECUTION', `Batch execution completed with errors`, 'WARNING');
+                }
+            } catch (error) {
+                showNotification('Batch execution failed: ' + error.message, 'danger');
+                addLogEntry('ERROR', `Batch execution error: ${error.message}`, 'ERROR');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showExecutionResults(results) {
+            const container = document.getElementById('resultsContainer');
+            
+            const resultsHtml = results.map((data, index) => {
+                const statusClass = data.success ? 'success' : 'danger';
+                const statusIcon = data.success ? 'check-circle' : 'times-circle';
+                
+                return `
+                    <div class="execution-results mt-3">
+                        <h6 class="text-${statusClass} mb-3">
+                            <i class="fas fa-${statusIcon} me-2"></i>
+                            Solution ${data.solution_id !== undefined ? data.solution_id + 1 : index + 1}: ${data.success ? 'Successful' : 'Failed'}
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <strong>Command Executed:</strong>
+                                <div class="command-preview mt-1">
+                                    ${data.command || 'N/A'}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Return Code:</strong>
+                                <span class="badge ${data.return_code === 0 ? 'bg-success' : 'bg-danger'} ms-2">
+                                    ${data.return_code}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        ${data.output ? `
+                            <div class="mb-3">
+                                <strong>Output:</strong>
+                                <pre class="bg-light p-3 rounded mt-2 small">${data.output}</pre>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.error ? `
+                            <div class="mb-3">
+                                <strong>Error Message:</strong>
+                                <pre class="bg-danger text-white p-3 rounded mt-2 small">${data.error}</pre>
+                            </div>
+                        ` : ''}
+                        
+                        ${data.simulation_mode ? `
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                This was executed in simulation mode for safety.
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML += resultsHtml;
+        }
+
+        function clearInput() {
+            document.getElementById('errorInput').value = '';
+            clearResults();
+            addLogEntry('SYSTEM', 'Input cleared', 'INFO');
+        }
+
+        function clearResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            currentSolutions = [];
+            currentSelectedSolution = null;
+        }
+
+        function updateStats() {
+            document.getElementById('analysisCount').textContent = analysisCount;
+            
+            const successRate = analysisCount > 0 ? ((successCount / analysisCount) * 100).toFixed(0) : 0;
+            document.getElementById('successRate').textContent = `${successRate}%`;
+        }
+
+        function refreshLogs() {
+            const category = document.getElementById('logCategory').value;
+            const container = document.getElementById('logsContainer');
+            
+            let filteredLogs = activityLog;
+            if (category) {
+                filteredLogs = activityLog.filter(log => log.category === category);
+            }
+            
+            if (filteredLogs.length === 0) {
+                container.innerHTML = '<div class="log-entry">No logs available for selected filter.</div>';
+                return;
+            }
+
+            const logHtml = filteredLogs.slice(0, 20).map(log => `
+                <div class="log-entry log-level-${log.level}">
+                    <span class="log-timestamp">[${log.timestamp}]</span>
+                    <span class="log-level">${log.level}:</span>
+                    <span class="log-message">${log.message}</span>
+                </div>
+            `).join('');
+
+            container.innerHTML = logHtml;
+        }
+
+        function clearLogs() {
+            if (!confirm('Are you sure you want to clear the client-side activity log?')) return;
+            
+            activityLog = [];
+            refreshLogs();
+            addLogEntry('SYSTEM', 'Client-side activity log cleared', 'INFO');
+            showNotification('Client-side activity log cleared', 'info');
+        }
+
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch('/health');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Update AI status
+                document.getElementById('aiStatus').innerHTML = 
+                    `<i class="fas fa-robot me-1"></i>AI: ${data.ai_components}`;
+                    
+                // Update AI mode in stats
+                const aiModeText = data.ai_components === 'loaded' ? 'Advanced' : 
+                                  data.ai_components === 'loading' ? 'Loading...' :
+                                  data.ai_components === 'error' ? 'Error' : 'Fallback';
+                document.getElementById('aiMode').textContent = aiModeText;
+
+                document.getElementById('systemStatus').innerHTML = 
+                    `<i class="fas fa-server me-1"></i>System: ${data.status}`;
+
+                // Update plugin status
+                if (data.active_plugin) {
+                    document.getElementById('pluginStatus').innerHTML = 
+                        `<i class="fas fa-puzzle-piece me-1"></i>Plugin: ${data.active_plugin}`;
+                }
+
+                addLogEntry('SYSTEM', `Health check: AI ${data.ai_components}, System ${data.status}`, 'INFO');
+
+            } catch (error) {
+                document.getElementById('aiStatus').innerHTML = 
+                    '<i class="fas fa-robot me-1"></i>AI: Error';
+                document.getElementById('systemStatus').innerHTML = 
+                    '<i class="fas fa-server me-1"></i>System: Error';
+                document.getElementById('aiMode').textContent = 'Offline';
+                
+                addLogEntry('ERROR', `Health check failed: ${error.message}`, 'ERROR');
+            }
+        }
+
+        // Refresh health status every 30 seconds
+        setInterval(checkSystemHealth, 30000);
+
+        // Auto-refresh logs every 10 seconds
+        setInterval(refreshLogs, 10000);
+
+        // Auto-refresh plugin info every 30 seconds if in loading status
+        setInterval(() => {
+            if (document.getElementById('plugins-panel').classList.contains('active')) {
+                // Check if we're currently showing loading status
+                const container = document.getElementById('pluginsList');
+                if (container.innerHTML.includes('Loading AI Plugins')) {
+                    loadPluginInfo();
+                }
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

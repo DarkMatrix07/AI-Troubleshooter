@@ -1,0 +1,588 @@
+[
+  {
+  "problem": "clear cache / temporary files / system cleanup",
+  "solutions": [
+    {
+      "command": "cleanmgr /sagerun:1",
+      "description": "Run Disk Cleanup with all options to clear system cache and temporary files."
+    },
+    {
+      "command": "del /q/f/s %TEMP%\\*",
+      "description": "Delete all temporary files from user temp directory."
+    },
+    {
+      "command": "RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 8",
+      "description": "Clear browser temporary internet files and cache."
+    },
+    {
+      "command": "ipconfig /flushdns",
+      "description": "Clear DNS resolver cache to fix network issues."
+    },
+    {
+      "command": "sfc /scannow",
+      "description": "Clear system file cache and verify integrity of system files."
+    }
+  ]
+},
+  {
+    "problem": "screen flickering / display glitches",
+    "solutions": [
+      {
+        "command": "taskkill /F /IM explorer.exe && start explorer.exe",
+        "description": "Restart Windows Explorer, which often fixes flickering."
+      },
+      {
+        "command": "dwm.exe",
+        "description": "Restart Desktop Window Manager to reset display pipeline."
+      },
+      {
+        "command": "msconfig",
+        "description": "Open System Configuration to check startup items or drivers causing flicker."
+      }
+    ]
+  },
+  {
+    "problem": "wifi / internet connection not working",
+    "solutions": [
+      {
+        "command": "netsh winsock reset && ipconfig /release && ipconfig /renew",
+        "description": "Reset network stack and renew IP address."
+      },
+      {
+        "command": "ipconfig /flushdns",
+        "description": "Clear DNS cache to resolve name resolution problems."
+      },
+      {
+        "command": "services.msc",
+        "description": "Check WLAN AutoConfig service is running."
+      }
+    ]
+  },
+  {
+    "problem": "computer won't boot / black screen",
+    "solutions": [
+      {
+        "command": "sfc /scannow",
+        "description": "Repair corrupted system files."
+      },
+      {
+        "command": "bootrec /fixmbr && bootrec /fixboot",
+        "description": "Repair boot records if Windows fails to start."
+      },
+      {
+        "command": "chkdsk /f C:",
+        "description": "Scan and fix disk errors that block booting."
+      }
+    ]
+  },
+  {
+    "problem": "slow performance / lag / lagging",
+    "solutions": [
+      {
+        "command": "tasklist /svc",
+        "description": "List running processes to identify heavy apps."
+      },
+      {
+        "command": "taskkill /F /IM chrome.exe",
+        "description": "Kill Chrome if it consumes excessive memory."
+      },
+      {
+        "command": "cleanmgr",
+        "description": "Open Disk Cleanup to free up space."
+      }
+    ]
+  },
+  {
+    "problem": "blue screen (BSOD crash)",
+    "solutions": [
+      {
+        "command": "chkdsk /f C:",
+        "description": "Repair file system issues."
+      },
+      {
+        "command": "sfc /scannow",
+        "description": "Fix corrupted system files."
+      },
+      {
+        "command": "dism /online /cleanup-image /restorehealth",
+        "description": "Repair system image corruption."
+      }
+    ]
+  },
+  {
+    "problem": "audio not working (speakers/headphones)",
+    "solutions": [
+      {
+        "command": "sfc /scannow && dism /online /cleanup-image /restorehealth",
+        "description": "Repair drivers/system image."
+      },
+      {
+        "command": "mmsys.cpl",
+        "description": "Open sound settings to set default playback device."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Reinstall/update audio drivers."
+      }
+    ]
+  },
+  {
+    "problem": "USB ports not working",
+    "solutions": [
+      {
+        "command": "devmgmt.msc",
+        "description": "Update/reinstall USB controller drivers."
+      },
+      {
+        "command": "powercfg.cpl",
+        "description": "Disable USB selective suspend in power options."
+      },
+      {
+        "command": "shutdown /r /f /t 0",
+        "description": "Restart system fully to reload USB stack."
+      }
+    ]
+  },
+  {
+    "problem": "printer not printing / offline",
+    "solutions": [
+      {
+        "command": "net stop spooler && net start spooler",
+        "description": "Restart print spooler service."
+      },
+      {
+        "command": "control printers",
+        "description": "Open Devices and Printers to set default printer."
+      },
+      {
+        "command": "spoolsv.exe",
+        "description": "Restart spooler process directly if stuck."
+      }
+    ]
+  },
+  {
+    "problem": "keyboard keys not working",
+    "solutions": [
+      {
+        "command": "sfc /scannow",
+        "description": "Fix corrupted keyboard drivers."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Reinstall keyboard driver."
+      },
+      {
+        "command": "osk",
+        "description": "Use on-screen keyboard to confirm hardware/software issue."
+      }
+    ]
+  },
+  {
+    "problem": "mouse cursor not moving / frozen touchpad",
+    "solutions": [
+      {
+        "command": "devmgmt.msc",
+        "description": "Update/reinstall touchpad or mouse drivers."
+      },
+      {
+        "command": "main.cpl",
+        "description": "Open Mouse Properties to adjust settings."
+      },
+      {
+        "command": "msconfig",
+        "description": "Check startup programs that may disable touchpad."
+      }
+    ]
+  },
+  {
+    "problem": "windows updates failing / stuck",
+    "solutions": [
+      {
+        "command": "net stop wuauserv && net stop cryptsvc && net stop bits && net stop msiserver",
+        "description": "Stop Windows Update services to reset update components."
+      },
+      {
+        "command": "ren C:\\Windows\\SoftwareDistribution SoftwareDistribution.old",
+        "description": "Rename SoftwareDistribution folder to clear update cache."
+      },
+      {
+        "command": "net start wuauserv && net start cryptsvc && net start bits && net start msiserver",
+        "description": "Restart Windows Update services after clearing cache."
+      }
+    ]
+  },
+  {
+    "problem": "file permissions / access denied errors",
+    "solutions": [
+      {
+        "command": "takeown /f \"C:\\path\\to\\file\" /r /d y",
+        "description": "Take ownership of files or folders recursively."
+      },
+      {
+        "command": "icacls \"C:\\path\\to\\file\" /grant %username%:F /t",
+        "description": "Grant full permissions to current user for file/folder."
+      },
+      {
+        "command": "attrib -r -s -h \"C:\\path\\to\\file\"",
+        "description": "Remove read-only, system, and hidden attributes from files."
+      }
+    ]
+  },
+  {
+    "problem": "disk space full / storage cleanup",
+    "solutions": [
+      {
+        "command": "cleanmgr /sageset:1",
+        "description": "Configure Disk Cleanup with advanced options."
+      },
+      {
+        "command": "forfiles /p %TEMP% /s /m *.* /d -7 /c \"cmd /c del @path\"",
+        "description": "Delete temporary files older than 7 days."
+      },
+      {
+        "command": "vssadmin delete shadows /all",
+        "description": "Delete all system restore points to free space."
+      }
+    ]
+  },
+  {
+    "problem": "registry errors / corruption",
+    "solutions": [
+      {
+        "command": "sfc /scannow",
+        "description": "Scan and repair system files including registry."
+      },
+      {
+        "command": "dism /online /cleanup-image /scanhealth",
+        "description": "Check Windows image for registry corruption."
+      },
+      {
+        "command": "chkdsk /f /r C:",
+        "description": "Check disk for bad sectors that may corrupt registry."
+      }
+    ]
+  },
+  {
+    "problem": "windows search not working",
+    "solutions": [
+      {
+        "command": "net stop \"Windows Search\" && net start \"Windows Search\"",
+        "description": "Restart Windows Search service."
+      },
+      {
+        "command": "control /name Microsoft.IndexingOptions",
+        "description": "Open Indexing Options to rebuild search index."
+      },
+      {
+        "command": "powershell -Command \"Get-WindowsPackage -Online | Where PackageName -like *QuickAssist*\"",
+        "description": "Check for corrupted search components."
+      }
+    ]
+  },
+  {
+    "problem": "taskbar not responding / frozen",
+    "solutions": [
+      {
+        "command": "taskkill /f /im explorer.exe && start explorer.exe",
+        "description": "Restart Windows Explorer to fix taskbar issues."
+      },
+      {
+        "command": "powershell -Command \"Get-AppXPackage -AllUsers | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register \\\"$($_.InstallLocation)\\\\AppXManifest.xml\\\"}\"",
+        "description": "Re-register Windows apps that may be causing taskbar issues."
+      },
+      {
+        "command": "sfc /scannow",
+        "description": "Repair system files that may affect taskbar functionality."
+      }
+    ]
+  },
+  {
+    "problem": "start menu not opening",
+    "solutions": [
+      {
+        "command": "powershell -Command \"Get-AppXPackage -AllUsers -Name Microsoft.Windows.ShellExperienceHost | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register \\\"$($_.InstallLocation)\\\\AppXManifest.xml\\\"}\"",
+        "description": "Re-register Shell Experience Host for Start Menu."
+      },
+      {
+        "command": "powershell -Command \"Get-AppxPackage Microsoft.Windows.Cortana | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register \\\"$($_.InstallLocation)\\\\AppXManifest.xml\\\"}\"",
+        "description": "Re-register Cortana package that affects Start Menu."
+      },
+      {
+        "command": "dism /online /cleanup-image /restorehealth",
+        "description": "Repair Windows image corruption affecting Start Menu."
+      }
+    ]
+  },
+  {
+    "problem": "high cpu usage / overheating",
+    "solutions": [
+      {
+        "command": "wmic process get name,processid,percentprocessortime",
+        "description": "Identify processes consuming high CPU resources."
+      },
+      {
+        "command": "powercfg /hibernate off",
+        "description": "Disable hibernation to reduce background CPU usage."
+      },
+      {
+        "command": "msconfig",
+        "description": "Disable unnecessary startup programs causing high CPU."
+      }
+    ]
+  },
+  {
+    "problem": "windows activation issues",
+    "solutions": [
+      {
+        "command": "slmgr /rearm",
+        "description": "Reset Windows activation grace period."
+      },
+      {
+        "command": "slmgr /ato",
+        "description": "Attempt to activate Windows online."
+      },
+      {
+        "command": "slmgr /dlv",
+        "description": "Display detailed license information for troubleshooting."
+      }
+    ]
+  },
+  {
+    "problem": "corrupted user profile",
+    "solutions": [
+      {
+        "command": "net user newuser password /add",
+        "description": "Create new user account to test profile corruption."
+      },
+      {
+        "command": "sfc /scannow",
+        "description": "Repair system files that may affect user profiles."
+      },
+      {
+        "command": "dism /online /cleanup-image /restorehealth",
+        "description": "Repair Windows image corruption affecting profiles."
+      }
+    ]
+  },
+  {
+    "problem": "windows defender not working / disabled",
+    "solutions": [
+      {
+        "command": "sc config WinDefend start= auto",
+        "description": "Set Windows Defender service to start automatically."
+      },
+      {
+        "command": "net start WinDefend",
+        "description": "Start Windows Defender service manually."
+      },
+      {
+        "command": "powershell -Command \"Set-MpPreference -DisableRealtimeMonitoring $false\"",
+        "description": "Enable real-time protection in Windows Defender."
+      }
+    ]
+  },
+  {
+    "problem": "system clock / time sync issues",
+    "solutions": [
+      {
+        "command": "w32tm /resync /force",
+        "description": "Force synchronization with time server."
+      },
+      {
+        "command": "net stop w32time && net start w32time",
+        "description": "Restart Windows Time service."
+      },
+      {
+        "command": "w32tm /register",
+        "description": "Re-register Windows Time service."
+      }
+    ]
+  },
+  {
+    "problem": "dns resolution problems",
+    "solutions": [
+      {
+        "command": "ipconfig /flushdns",
+        "description": "Clear DNS resolver cache."
+      },
+      {
+        "command": "netsh int ip set dns \"Wi-Fi\" static 8.8.8.8",
+        "description": "Set DNS server to Google's public DNS."
+      },
+      {
+        "command": "nslookup google.com",
+        "description": "Test DNS resolution to verify connectivity."
+      }
+    ]
+  },
+  {
+    "problem": "windows firewall blocking apps",
+    "solutions": [
+      {
+        "command": "netsh advfirewall firewall add rule name=\"AppName\" dir=in action=allow program=\"C:\\path\\to\\app.exe\"",
+        "description": "Add firewall exception for specific application."
+      },
+      {
+        "command": "netsh advfirewall set allprofiles state off",
+        "description": "Temporarily disable Windows Firewall for testing."
+      },
+      {
+        "command": "control firewall.cpl",
+        "description": "Open Windows Firewall settings GUI."
+      }
+    ]
+  },
+  {
+    "problem": "system file corruption",
+    "solutions": [
+      {
+        "command": "sfc /scannow",
+        "description": "Scan and repair corrupted system files."
+      },
+      {
+        "command": "dism /online /cleanup-image /restorehealth",
+        "description": "Repair Windows component store corruption."
+      },
+      {
+        "command": "chkdsk /f /r C:",
+        "description": "Check and repair file system errors on system drive."
+      }
+    ]
+  },
+  {
+    "problem": "bluetooth not working / pairing failed",
+    "solutions": [
+      {
+        "command": "start ms-settings:bluetooth",
+        "description": "Open Bluetooth settings to toggle and re-pair devices."
+      },
+      {
+        "command": "services.msc",
+        "description": "Ensure Bluetooth Support Service is running."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Update/reinstall Bluetooth drivers in Device Manager."
+      }
+    ]
+  },
+  {
+    "problem": "webcam / camera not working",
+    "solutions": [
+      {
+        "command": "start ms-settings:privacy-webcam",
+        "description": "Allow camera access in privacy settings."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Update/reinstall camera drivers in Device Manager."
+      },
+      {
+        "command": "dxdiag",
+        "description": "Check device detection in DirectX Diagnostic Tool."
+      }
+    ]
+  },
+  {
+    "problem": "microphone not working / mic muted",
+    "solutions": [
+      {
+        "command": "start ms-settings:privacy-microphone",
+        "description": "Allow microphone access in privacy settings."
+      },
+      {
+        "command": "mmsys.cpl",
+        "description": "Open sound settings to set default recording device."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Update/reinstall microphone drivers in Device Manager."
+      }
+    ]
+  },
+  {
+    "problem": "windows store not working / apps not downloading",
+    "solutions": [
+      {
+        "command": "wsreset.exe",
+        "description": "Reset Microsoft Store cache."
+      },
+      {
+        "command": "start ms-settings:appsfeatures",
+        "description": "Open Apps & features to repair or reset the Store app."
+      },
+      {
+        "command": "powershell -Command \"Get-AppxPackage -AllUsers Microsoft.WindowsStore | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register \\\"$($_.InstallLocation)\\\\AppXManifest.xml\\\"}\"",
+        "description": "Re-register Microsoft Store app."
+      }
+    ]
+  },
+  {
+    "problem": "file explorer not responding / crashing",
+    "solutions": [
+      {
+        "command": "taskkill /f /im explorer.exe && start explorer.exe",
+        "description": "Restart File Explorer process."
+      },
+      {
+        "command": "sfc /scannow",
+        "description": "Repair system files that may affect Explorer."
+      },
+      {
+        "command": "cleanmgr",
+        "description": "Free up disk space that may impact Explorer stability."
+      }
+    ]
+  },
+  {
+    "problem": "external monitor not detected / second screen",
+    "solutions": [
+      {
+        "command": "start ms-settings:display",
+        "description": "Open display settings to detect and configure monitors."
+      },
+      {
+        "command": "DisplaySwitch.exe",
+        "description": "Toggle display modes (PC only, duplicate, extend)."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Update display adapter drivers in Device Manager."
+      }
+    ]
+  },
+  {
+    "problem": "battery not charging / battery draining fast",
+    "solutions": [
+      {
+        "command": "powercfg /batteryreport",
+        "description": "Generate a battery health report."
+      },
+      {
+        "command": "powercfg.cpl",
+        "description": "Open power options to adjust power plan."
+      },
+      {
+        "command": "devmgmt.msc",
+        "description": "Reinstall battery drivers in Device Manager."
+      }
+    ]
+  },
+  {
+    "problem": "apps crashing / application not opening",
+    "solutions": [
+      {
+        "command": "eventvwr.msc",
+        "description": "Check Application logs for crash details."
+      },
+      {
+        "command": "sfc /scannow",
+        "description": "Repair system files that may cause app crashes."
+      },
+      {
+        "command": "dism /online /cleanup-image /restorehealth",
+        "description": "Repair Windows image corruption affecting apps."
+      }
+    ]
+  }
+]
